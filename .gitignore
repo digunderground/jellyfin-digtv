@@ -1,4 +1,10 @@
 .DS_Store
+# secrets / local env — NEVER commit (repo is public)
+.env
+.env.local
+credentials.json
+token.json
+!.env.example
 bin/
 obj/
 publish/
