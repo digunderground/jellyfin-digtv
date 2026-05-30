@@ -115,6 +115,44 @@ optional **burn-in** toggle for stubborn clients. Likely **v1.2.0**.
 
 ---
 
+## 🔵 #4 — Dedicated home-screen section for DIGtv (config toggle)
+
+**Goal:** Surface DIGtv channels in their own home-screen row so users don't dig through Playlists.
+New config option to turn it on/off.
+
+**Feasibility verdict (be honest with expectations):**
+- **A literal new "media type" — NO.** Media types (`BaseItemKind`) are core enums; a plugin can't add
+  one, and clients wouldn't render it.
+- **A custom home section on *every* device — NO.** Home screens are **client-rendered** with a fixed
+  set of sections on native apps (Android TV, Roku, Swiftfin, embedded TVs). No server plugin can inject
+  a section into those. This is a hard Jellyfin limitation.
+- **A dedicated "DIGtv" row on the *web client* + *Jellyfin Media Player* — YES**, via the **Home Screen
+  Sections (HSS)** plugin you already added (`b8298e01-…`). HSS exposes
+  `IHomeScreenManager.RegisterResultsDelegate<T>(T handler)`; DIGtv registers a `PluginDefinedSection`
+  ("DIGtv", `OnGetResults` → `QueryResult<BaseItemDto>` of the channel playlists). Clicking a card opens/
+  plays the channel. Requires HSS **+ File Transformation (`5e87cc92-…`) + Plugin Pages** installed, and
+  note HSS **replaces** the whole web home screen (not just adds a row).
+
+**Recommended approach:**
+- **Config:** global `ShowOnHomeScreen` toggle (default **off**) + optional per-channel `ShowOnHome`.
+- **Integration as an *optional* dependency (do this):** don't hard-link HSS (DIGtv must still load if HSS
+  is absent). On startup, detect the HSS assembly/`IHomeScreenManager` via reflection; if present and the
+  toggle is on, construct `PluginDefinedSection("digtv-channels", "DIGtv", …)` and call
+  `RegisterResultsDelegate(section)`. If HSS isn't installed, show a note in the DIGtv config page linking
+  the HSS + File Transformation + Plugin Pages install. (Simpler alt: declare HSS a manifest dependency
+  and compile against it — but that forces the install and couples versions; reflection keeps us standalone.)
+- **Native-client mitigation (works everywhere, do this too):** prefix generated playlists (e.g.
+  `▶ DIGtv — <name>`) so they sort to the top of the Playlists view, and/or drop them in a **Collection**,
+  so on TV/Roku they're one click away even without a custom section.
+
+**Caveats:** web/JMP only; depends on three third-party plugins staying compatible; HSS is "Experimental"
+on 10.10.7 and takes over the entire web home. Effort: medium. Likely **v1.3.0** (after #1–#3), unless you
+want the home row sooner — then we can pull it forward.
+
+---
+
 ## Notes
-- Ship order suggestion: **#1 (v1.0.2.0)** → **#2 (v1.1.0)** → **#3 (v1.2.0)**.
-- All three respect the core rule: server-side only, native playlists/subtitles, works on every client.
+- Ship order suggestion: **#1 (v1.0.2.0)** → **#2 (v1.1.0)** → **#3 (v1.2.0)** → **#4 (v1.3.0)**.
+- Core rule for #1–#3: server-side only, native playlists/subtitles, works on every client.
+- #4 is the exception — a true home section is only achievable on web/JMP (via HSS); native TV apps get
+  the naming/Collection mitigation instead.
