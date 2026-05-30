@@ -151,8 +151,58 @@ want the home row sooner — then we can pull it forward.
 
 ---
 
+## 🔬 #5 (research/brainstorm) — Home presence on ALL devices (out-of-the-box)
+
+**The governing fact:** native clients (Android TV, Roku, Swiftfin, Kodi, web) only render the
+**built-in, server-driven** home rails — **My Media (library tiles)**, **Latest \<Library\>**,
+**Continue Watching / Next Up**, and **Live TV "On Now."** A plugin can't add a *new* section to
+native apps, but it **can feed those existing rails**. Verified in 10.10.7:
+`ILibraryManager.AddVirtualFolder(name, CollectionTypeOptions?, LibraryOptions, refresh)` +
+`AddMediaPath` (create a library programmatically), and Live TV is plugin-extensible
+(`ILiveTvService` / `ITunerHost` / `IListingsProvider`). So instead of "a custom section," the move
+is **"make DIGtv content ride a native rail."** Options, ranked:
+
+**B1 — DIGtv as a virtual Live TV channel (most universal + most "MTV").**
+- Implement a tuner host / Live TV service (or generate an **M3U + XMLTV** that Jellyfin's built-in
+  M3U tuner ingests) that streams the interleaved channel as a continuous live feed, with an EPG of
+  the now-playing song.
+- Result: appears in **Live TV + Guide + "On Now"** on *every* client — a flip-to-it channel. Peak MTV.
+- Crux/cost: must serve a **continuous HLS stream** (long-running ffmpeg concat/scheduler) — the hard
+  part; transcode load; live-only seeking; EPG generation. **High effort.**
+
+**A2 — "DIGtv" library of `.strm` files → My Media tile + "Latest DIGtv" row everywhere (lean).**
+- `AddVirtualFolder` makes a DIGtv library; one tiny `.strm` per channel points at a DIGtv streaming
+  endpoint. Native tile + Latest row on all clients; near-zero storage.
+- Crux/cost: needs the same stream endpoint as B1; confirm `.strm` playback per client. **Medium-high.**
+
+**A1 — Pre-rendered channel "episodes" in a TV-structured library (no live server needed).**
+- ffmpeg-concat each channel into a long video (rolling ~2-hr block or nightly "episode") as a fake
+  **Series → Season → Episodes** library via `AddVirtualFolder` (CollectionType = tvshows).
+- Result: **My Media tile + Latest + Continue Watching + Next Up** on all clients; resume works; plays
+  literally everywhere (it's one ordinary file).
+- Cost: full re-encode + **big storage**; regeneration cost; loses per-track skip & per-song metadata
+  (it's one video). **Medium effort, heavy resources.**
+- **Synergy:** if we already re-encode for **#2 (normalize)** and **#3 (overlay burn-in)**, concatenation
+  is just one more ffmpeg stage — a single pipeline yields normalized + overlaid + concatenated episodes.
+
+**C1 — "Continue Watching" pin (cheap hack).**
+- Keep a "DIGtv" item at partial playstate so it sits in Continue Watching on all clients. Janky (resets
+  on completion, single item), but zero new media. **Low effort, low polish.**
+
+**Common crux:** B1/A2 need a **streaming endpoint** (turn the interleaved playlist into a continuous
+video); A1 sidesteps streaming by **pre-rendering files** (trades compute + storage instead). C1 needs
+neither but is a hack.
+
+**Recommendation:** if we want true all-device home presence, prototype **A1** — most robust, no streaming
+server, rides the most native rails, and reuses the #2/#3 render pipeline (accept the storage cost). Go
+**B1** only if a real "live channel" is the dream (highest wow, highest effort/risk). Keep **#4 (HSS web
+row)** as the easy near-term win for web/JMP. A pragmatic stack: **#4 now (web)** + **A1 later (everywhere)**.
+
+---
+
 ## Notes
-- Ship order suggestion: **#1 (v1.0.2.0)** → **#2 (v1.1.0)** → **#3 (v1.2.0)** → **#4 (v1.3.0)**.
+- Ship order suggestion: **#1 (v1.0.2.0)** → **#2 (v1.1.0)** → **#3 (v1.2.0)** → **#4 (v1.3.0)**; **#5** is
+  a research track (A1 or B1) that can slot after #3 since it reuses the render pipeline.
 - Core rule for #1–#3: server-side only, native playlists/subtitles, works on every client.
 - #4 is the exception — a true home section is only achievable on web/JMP (via HSS); native TV apps get
   the naming/Collection mitigation instead.
