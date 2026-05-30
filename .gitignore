@@ -12,3 +12,6 @@ artifact/
 *.zip
 *.user
 .vs/
+
+# Logo R&D — only the chosen, exported final art ships in imagery/
+imagery/concept/

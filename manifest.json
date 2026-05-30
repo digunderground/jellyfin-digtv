@@ -6,6 +6,7 @@
         "description": "MTV-style channels: interleave music videos with station bumpers into native playlists that play on every Jellyfin client.",
         "overview": "Build MTV-style channels from your own playlists/folders.",
         "owner": "digunderground",
+        "imageUrl": "https://raw.githubusercontent.com/digunderground/jellyfin-digtv/main/imagery/manifest-thumb.png",
         "versions": [
             {
                 "version": "1.0.1.0",

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1600 900">
+  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <defs>
+    <style>
+      .st0, .st1 {
+        fill: #00e6ff;
+      }
+
+      .st0, .st1, .st2, .st3, .st4, .st5 {
+        isolation: isolate;
+      }
+
+      .st0, .st2, .st3 {
+        font-size: 460px;
+      }
+
+      .st0, .st2, .st3, .st4, .st5 {
+        font-family: Arial-Black, 'Arial Black';
+        font-weight: 800;
+      }
+
+      .st1 {
+        font-family: CourierNewPS-BoldMT, 'Courier New';
+        font-size: 56px;
+        font-weight: 700;
+        letter-spacing: 0em;
+      }
+
+      .st2 {
+        stroke: #00e6ff;
+        stroke-width: 4px;
+      }
+
+      .st2, .st5 {
+        fill: none;
+      }
+
+      .st6 {
+        fill: url(#linear-gradient);
+      }
+
+      .st3 {
+        fill: #0a0a12;
+      }
+
+      .st7, .st4 {
+        fill: #ff2bd6;
+      }
+
+      .st4, .st5 {
+        font-size: 380px;
+      }
+
+      .st8 {
+        opacity: .6;
+      }
+
+      .st5 {
+        stroke: #fff;
+        stroke-width: 6px;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="494.2" y1="827.1" x2="494.2" y2="828.1" gradientTransform="translate(-789906 745272) scale(1600 -900)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#180628"/>
+      <stop offset="1" stop-color="#06030a"/>
+    </linearGradient>
+  </defs>
+  <rect class="st6" width="1600" height="900"/>
+  <g>
+    <text class="st0" transform="translate(384 566)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(382 564)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(380 562)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(378 560)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(376 558)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(374 556)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(372 554)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(370 552)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(368 550)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(366 548)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(364 546)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(362 544)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(360 542)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(358 540)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(356 538)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(354 536)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(352 534)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(350 532)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(348 530)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(346 528)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(344 526)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st0" transform="translate(342 524)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st3" transform="translate(340 522)"><tspan x="0" y="0">DIG</tspan></text>
+    <text class="st2" transform="translate(340 522)"><tspan x="0" y="0">DIG</tspan></text>
+  </g>
+  <text class="st1" transform="translate(437 630)"><tspan x="0" y="0">DIG TELEVISION</tspan></text>
+  <g class="st8">
+    <circle class="st7" cx="1056" cy="450" r="6"/>
+    <circle class="st7" cx="1152" cy="414" r="4"/>
+    <circle class="st7" cx="1280" cy="468" r="5"/>
+    <circle class="st7" cx="1376" cy="666" r="7"/>
+    <circle class="st7" cx="992" cy="738" r="5"/>
+  </g>
+  <text class="st4" transform="translate(988 671.7) rotate(-12)"><tspan x="0" y="0">tv</tspan></text>
+  <g>
+    <text class="st4" transform="translate(988 671.7) rotate(-12)"><tspan x="0" y="0">tv</tspan></text>
+    <text class="st5" transform="translate(988 671.7) rotate(-12)"><tspan x="0" y="0">tv</tspan></text>
+  </g>
+</svg>

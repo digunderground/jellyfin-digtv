@@ -1,4 +1,8 @@
-# DIGtv — MTV-style channels for Jellyfin
+<p align="center">
+  <img src="imagery/github-social.png" alt="DIGtv — DIG Television" width="640" />
+</p>
+
+<h1 align="center">DIGtv — MTV-style channels for Jellyfin</h1>
 
 Turn your music-video library into a classic MTV experience. DIGtv interleaves
 **music videos** (playlist A) with short **station bumpers / mini-commercials**
@@ -15,6 +19,16 @@ Android TV, Roku, embedded smart-TV apps — with zero per-device setup.
 - **Per-channel** owner + "share with all users".
 - Rebuild via a **"Regenerate now"** button or a nightly **scheduled task**.
 - All data mirrored to `plugins/DIGtv/channels.json` for easy inspection.
+
+## Settings
+
+Manage everything from **Dashboard → My Plugins → DIGtv**: add channels, pick the
+music-video and bumper sources, set the bumper frequency, and toggle randomize /
+reshuffle / share — then **Save all** and **Regenerate now**.
+
+| Create a channel | Per-channel options |
+| --- | --- |
+| ![DIGtv settings — create channel](imagery/screenshots/settings-1-create-channel.png) | ![DIGtv settings — channel options](imagery/screenshots/settings-2-channel-options.png) |
 
 ## How it works (design note)
 

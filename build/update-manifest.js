@@ -48,6 +48,7 @@ if (!plugin) {
         description: meta.description || meta.overview || meta.name,
         overview: meta.overview || meta.description || meta.name,
         owner: meta.owner || '',
+        imageUrl: meta.imageUrl || undefined,
         versions: []
     };
     manifest.push(plugin);
