@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.DigTv</RootNamespace>
     <AssemblyName>Jellyfin.Plugin.DigTv</AssemblyName>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -14,15 +14,16 @@
   </PropertyGroup>
 
   <!--
-    IMPORTANT: pin these two versions to EXACTLY match the Jellyfin server version
-    installed on your Synology NAS (Dashboard -> About). If they don't match the
-    server's ABI the plugin will load as "NotSupported". 10.11.x targets .NET 9.
+    IMPORTANT: pin these two versions to match the Jellyfin server line installed
+    on your Synology NAS (Dashboard -> About). If the major.minor doesn't match the
+    server the plugin will load as "NotSupported" or be hidden from the catalog.
+    Target server: 10.10.7 -> net8.0 + Jellyfin.* 10.10.7. (10.11.x would need net9.0.)
   -->
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Controller" Version="10.11.3">
+    <PackageReference Include="Jellyfin.Controller" Version="10.10.7">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
-    <PackageReference Include="Jellyfin.Model" Version="10.11.3">
+    <PackageReference Include="Jellyfin.Model" Version="10.10.7">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>

@@ -72,7 +72,8 @@ public class RegenerateChannelsTask : IScheduledTask
         {
             new TaskTriggerInfo
             {
-                Type = TaskTriggerInfoType.DailyTrigger,
+                // 10.10 uses the string trigger constants (10.11+ switched to an enum).
+                Type = TaskTriggerInfo.TriggerDaily,
                 TimeOfDayTicks = TimeSpan.FromHours(4).Ticks
             }
         };

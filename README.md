@@ -37,7 +37,9 @@ dotnet publish Jellyfin.Plugin.DigTv.csproj -c Release -o publish
 # -> publish/Jellyfin.Plugin.DigTv.dll
 ```
 
-Requires the .NET 9 SDK (Jellyfin 10.11.x). For 10.10.x, retarget `net8.0` and pin `10.10.x`.
+Targets **Jellyfin 10.10.7** → requires the **.NET 8 SDK** and `Jellyfin.*` `10.10.7`
+(set in the `.csproj`). For a 10.11.x server, retarget `net9.0`, pin `10.11.x`, and set
+`targetAbi` to `10.11.0.0` in `meta.json`.
 
 ## Install via repository URL (recommended — works on the NAS, easy updates)
 
