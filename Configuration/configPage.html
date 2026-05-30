@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>DIGtv</title>
+</head>
+<body>
+<div id="DigTvConfigPage" data-role="page" class="page type-interior pluginConfigurationPage DigTvConfigPage"
+     data-require="emby-input,emby-button,emby-select,emby-checkbox,emby-collapse">
+    <div data-role="content">
+        <div class="content-primary">
+
+            <div class="verticalSection verticalSection-extrabottompadding">
+                <div class="sectionTitleContainer flex align-items-center">
+                    <h2 class="sectionTitle">DIGtv – MTV-style channels</h2>
+                </div>
+                <p class="fieldDescription">
+                    Each channel interleaves music videos from one set of sources with station bumpers
+                    from another, then writes a native playlist you can press <b>Play</b> on from any
+                    device (web, TV, Roku, etc.). Edit a channel, click <b>Save all</b>, then
+                    <b>Regenerate</b> to (re)build its playlist.
+                </p>
+
+                <button is="emby-button" type="button" id="addChannel" class="raised block">
+                    <span>Add channel</span>
+                </button>
+
+                <div id="channelList"></div>
+
+                <br />
+                <button is="emby-button" type="submit" id="saveAll" class="raised button-submit block">
+                    <span>Save all</span>
+                </button>
+                <p class="fieldDescription">
+                    Nightly rebuilds run automatically (Dashboard → Scheduled Tasks → “DIGtv – Regenerate channels”).
+                    Data is mirrored to <code>plugins/DIGtv/channels.json</code>.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            var pluginId = "b3f8e2a1-7c4d-4e6b-9a2f-1d5c8e0a4b7e";
+
+            var state = {
+                channels: [],
+                sources: { playlists: [], folders: [] },
+                users: []
+            };
+
+            function api(method, path, body) {
+                var opts = {
+                    type: method,
+                    url: ApiClient.getUrl("DigTv/" + path),
+                    contentType: "application/json"
+                };
+                if (body !== undefined) {
+                    opts.data = JSON.stringify(body);
+                }
+                if (method === "GET") {
+                    opts.dataType = "json";
+                }
+                return ApiClient.ajax(opts);
+            }
+
+            function newChannel() {
+                return {
+                    Id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() :
+                        "00000000-0000-0000-0000-" + Date.now().toString(16).padStart(12, "0"),
+                    Name: "New DIGtv Channel",
+                    Enabled: true,
+                    MusicVideoSourceIds: [],
+                    BumperSourceIds: [],
+                    BumperFrequency: 3,
+                    Randomize: true,
+                    ReshuffleOnRegenerate: true,
+                    OwnerUserId: "00000000-0000-0000-0000-000000000000",
+                    Shared: true,
+                    TargetPlaylistId: "00000000-0000-0000-0000-000000000000",
+                    MaxItems: 0,
+                    LastStatus: null,
+                    LastRunUtc: null,
+                    LastItemCount: 0
+                };
+            }
+
+            function esc(s) {
+                return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+                    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+                });
+            }
+
+            // Read a property regardless of Pascal/camel casing returned by the server.
+            function gp(o, key, fallback) {
+                if (o == null) { return fallback; }
+                if (key in o) { return o[key]; }
+                var lc = key.charAt(0).toLowerCase() + key.slice(1);
+                return (lc in o) ? o[lc] : fallback;
+            }
+
+            // Merge a server channel into a fully-shaped (PascalCase) channel object.
+            function normalizeChannel(raw) {
+                var c = newChannel();
+                Object.keys(c).forEach(function (k) {
+                    var v = gp(raw, k, undefined);
+                    if (v !== undefined && v !== null) { c[k] = v; }
+                });
+                return c;
+            }
+
+            function sourceOptions(selectedIds) {
+                var sel = selectedIds || [];
+                var html = "";
+                function opt(s) {
+                    var id = gp(s, "Id"), name = gp(s, "Name");
+                    return '<option value="' + id + '"' + (sel.indexOf(id) > -1 ? " selected" : "") + ">" + esc(name) + "</option>";
+                }
+                if (state.sources.playlists && state.sources.playlists.length) {
+                    html += '<optgroup label="Playlists">' + state.sources.playlists.map(opt).join("") + "</optgroup>";
+                }
+                if (state.sources.folders && state.sources.folders.length) {
+                    html += '<optgroup label="Libraries / Folders">' + state.sources.folders.map(opt).join("") + "</optgroup>";
+                }
+                return html;
+            }
+
+            function userOptions(selectedId) {
+                var html = '<option value="00000000-0000-0000-0000-000000000000">(First user)</option>';
+                state.users.forEach(function (u) {
+                    var id = gp(u, "Id"), name = gp(u, "Name");
+                    html += '<option value="' + id + '"' + (id === selectedId ? " selected" : "") + ">" + esc(name) + "</option>";
+                });
+                return html;
+            }
+
+            function channelCard(ch, idx) {
+                return '' +
+                '<div class="verticalSection" style="border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:1em;margin:1em 0;" data-idx="' + idx + '">' +
+                    '<div class="inputContainer">' +
+                        '<input is="emby-input" type="text" data-field="Name" label="Channel name" value="' + esc(ch.Name) + '" />' +
+                    '</div>' +
+
+                    '<div class="inputContainer">' +
+                        '<label class="inputLabel">Music-video sources (playlists / libraries) — Ctrl/Cmd-click to multi-select</label>' +
+                        '<select data-field="MusicVideoSourceIds" multiple size="5" class="emby-select" style="width:100%;">' + sourceOptions(ch.MusicVideoSourceIds) + '</select>' +
+                    '</div>' +
+
+                    '<div class="inputContainer">' +
+                        '<label class="inputLabel">Bumper sources (playlists / libraries)</label>' +
+                        '<select data-field="BumperSourceIds" multiple size="5" class="emby-select" style="width:100%;">' + sourceOptions(ch.BumperSourceIds) + '</select>' +
+                    '</div>' +
+
+                    '<div class="inputContainer">' +
+                        '<input is="emby-input" type="number" min="1" data-field="BumperFrequency" label="Insert a bumper after every N videos" value="' + (ch.BumperFrequency || 3) + '" />' +
+                    '</div>' +
+
+                    '<div class="inputContainer">' +
+                        '<input is="emby-input" type="number" min="0" data-field="MaxItems" label="Max items (0 = unlimited)" value="' + (ch.MaxItems || 0) + '" />' +
+                    '</div>' +
+
+                    '<div class="inputContainer">' +
+                        '<label class="inputLabel">Playlist owner</label>' +
+                        '<select data-field="OwnerUserId" class="emby-select" style="width:100%;">' + userOptions(ch.OwnerUserId) + '</select>' +
+                    '</div>' +
+
+                    '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="Randomize"' + (ch.Randomize ? " checked" : "") + ' /><span>Randomize order</span></label>' +
+                    '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="ReshuffleOnRegenerate"' + (ch.ReshuffleOnRegenerate ? " checked" : "") + ' /><span>Fresh shuffle on every rebuild</span></label>' +
+                    '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="Shared"' + (ch.Shared ? " checked" : "") + ' /><span>Share with all users</span></label>' +
+                    '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="Enabled"' + (ch.Enabled ? " checked" : "") + ' /><span>Include in nightly rebuild</span></label>' +
+
+                    '<p class="fieldDescription">' + (ch.LastStatus ? esc(ch.LastStatus) + (ch.LastRunUtc ? " — " + esc(ch.LastRunUtc) : "") : "Not built yet.") + '</p>' +
+
+                    '<button is="emby-button" type="button" class="raised regenBtn" data-idx="' + idx + '"><span>Regenerate now</span></button> ' +
+                    '<button is="emby-button" type="button" class="raised button-delete deleteBtn" data-idx="' + idx + '"><span>Delete</span></button>' +
+                '</div>';
+            }
+
+            function render(page) {
+                var list = page.querySelector("#channelList");
+                if (!state.channels.length) {
+                    list.innerHTML = '<p class="fieldDescription">No channels yet. Click “Add channel”.</p>';
+                    return;
+                }
+                list.innerHTML = state.channels.map(channelCard).join("");
+
+                list.querySelectorAll(".regenBtn").forEach(function (b) {
+                    b.addEventListener("click", function () { regenerate(page, parseInt(b.getAttribute("data-idx"), 10)); });
+                });
+                list.querySelectorAll(".deleteBtn").forEach(function (b) {
+                    b.addEventListener("click", function () { removeChannel(page, parseInt(b.getAttribute("data-idx"), 10)); });
+                });
+            }
+
+            function collect(page) {
+                page.querySelectorAll("#channelList > [data-idx]").forEach(function (card) {
+                    var idx = parseInt(card.getAttribute("data-idx"), 10);
+                    var ch = state.channels[idx];
+                    if (!ch) { return; }
+                    card.querySelectorAll("[data-field]").forEach(function (el) {
+                        var f = el.getAttribute("data-field");
+                        if (el.type === "checkbox") {
+                            ch[f] = el.checked;
+                        } else if (el.multiple) {
+                            ch[f] = Array.prototype.slice.call(el.selectedOptions).map(function (o) { return o.value; });
+                        } else if (el.type === "number") {
+                            ch[f] = parseInt(el.value || "0", 10) || 0;
+                        } else {
+                            ch[f] = el.value;
+                        }
+                    });
+                });
+            }
+
+            function loadAll(page) {
+                Dashboard.showLoadingMsg();
+                Promise.all([api("GET", "channels"), api("GET", "sources"), api("GET", "users")])
+                    .then(function (res) {
+                        state.channels = (res[0] || []).map(normalizeChannel);
+                        state.sources = res[1] || { playlists: [], folders: [] };
+                        state.sources.playlists = gp(state.sources, "playlists", []) || [];
+                        state.sources.folders = gp(state.sources, "folders", []) || [];
+                        state.users = res[2] || [];
+                        render(page);
+                        Dashboard.hideLoadingMsg();
+                    })
+                    .catch(function (e) {
+                        Dashboard.hideLoadingMsg();
+                        Dashboard.alert("Failed to load DIGtv config: " + e);
+                    });
+            }
+
+            function saveAll(page) {
+                collect(page);
+                Dashboard.showLoadingMsg();
+                return api("POST", "channels", state.channels)
+                    .then(function () { Dashboard.hideLoadingMsg(); Dashboard.processPluginConfigurationUpdateResult(); })
+                    .catch(function (e) { Dashboard.hideLoadingMsg(); Dashboard.alert("Save failed: " + e); });
+            }
+
+            function regenerate(page, idx) {
+                saveAll(page).then(function () {
+                    var ch = state.channels[idx];
+                    if (!ch) { return; }
+                    Dashboard.showLoadingMsg();
+                    api("POST", "channels/" + ch.Id + "/regenerate")
+                        .then(function (r) {
+                            Dashboard.hideLoadingMsg();
+                            Dashboard.alert("Built '" + ch.Name + "': " + gp(r, "TotalItems") + " items (" + gp(r, "VideoCount") + " videos / " + gp(r, "BumperCount") + " bumpers).");
+                            loadAll(page);
+                        })
+                        .catch(function (e) {
+                            Dashboard.hideLoadingMsg();
+                            Dashboard.alert("Regenerate failed: " + (e && e.message ? e.message : e));
+                            loadAll(page);
+                        });
+                });
+            }
+
+            function removeChannel(page, idx) {
+                var ch = state.channels[idx];
+                if (!ch) { return; }
+                state.channels.splice(idx, 1);
+                api("DELETE", "channels/" + ch.Id).catch(function () { });
+                render(page);
+            }
+
+            document.querySelector("#DigTvConfigPage").addEventListener("pageshow", function () {
+                var page = this;
+                loadAll(page);
+
+                page.querySelector("#addChannel").addEventListener("click", function () {
+                    collect(page);
+                    state.channels.push(newChannel());
+                    render(page);
+                });
+
+                page.querySelector("#saveAll").addEventListener("click", function (e) {
+                    e.preventDefault();
+                    saveAll(page);
+                });
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>

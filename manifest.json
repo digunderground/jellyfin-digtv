@@ -1,0 +1,11 @@
+[
+    {
+        "category": "General",
+        "guid": "b3f8e2a1-7c4d-4e6b-9a2f-1d5c8e0a4b7e",
+        "name": "DIGtv",
+        "description": "MTV-style channels: interleave music videos with station bumpers into native playlists that play on every Jellyfin client.",
+        "overview": "Build MTV-style channels from your own playlists/folders.",
+        "owner": "digunderground",
+        "versions": []
+    }
+]

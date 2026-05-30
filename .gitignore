@@ -1,0 +1,8 @@
+.DS_Store
+bin/
+obj/
+publish/
+artifact/
+*.zip
+*.user
+.vs/

@@ -1,0 +1,72 @@
+name: Build & Release DIGtv
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Resolve version (tag without leading v)
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: |
+          dotnet restore Jellyfin.Plugin.DigTv.csproj
+          dotnet publish Jellyfin.Plugin.DigTv.csproj -c Release -o publish
+
+      - name: Package zip (DLL + meta.json)
+        id: pkg
+        run: |
+          mkdir -p artifact
+          cp publish/Jellyfin.Plugin.DigTv.dll artifact/
+          cp meta.json artifact/
+          ZIP="digtv_${{ steps.ver.outputs.version }}.zip"
+          (cd artifact && zip -r "../$ZIP" .)
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.pkg.outputs.zip }}
+
+      - name: Update manifest.json on main
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          SRC: ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.pkg.outputs.zip }}
+        run: |
+          # The release zip (untracked) survives the branch switch; switch to main to commit.
+          git fetch origin main
+          git checkout main
+          node build/update-manifest.js "${{ steps.ver.outputs.version }}" "$SRC" "${{ steps.pkg.outputs.zip }}" "Release ${{ github.ref_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git commit -m "chore: publish manifest for ${{ github.ref_name }}" || echo "manifest unchanged"
+          git push origin main
+
+      - name: Summary
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "### DIGtv ${{ github.ref_name }} released :tv:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Add this **Repository URL** in Jellyfin (Dashboard → Plugins → Repositories):" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "https://raw.githubusercontent.com/${{ github.repository }}/main/manifest.json" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
