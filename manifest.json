@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/digunderground/jellyfin-digtv/main/imagery/manifest-thumb.png",
         "versions": [
             {
+                "version": "1.0.3.0",
+                "changelog": "Release v1.0.3.0",
+                "targetAbi": "10.10.0.0",
+                "sourceUrl": "https://github.com/digunderground/jellyfin-digtv/releases/download/v1.0.3.0/digtv_1.0.3.0.zip",
+                "checksum": "8f8db091cdf0b82bb6ad9350e6810730",
+                "timestamp": "2026-06-23T22:59:25Z"
+            },
+            {
                 "version": "1.0.2.0",
                 "changelog": "Release v1.0.2.0",
                 "targetAbi": "10.10.0.0",
