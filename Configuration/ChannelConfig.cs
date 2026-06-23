@@ -44,6 +44,13 @@ public class ChannelConfig
     /// <summary>Gets or sets an optional cap on total items (0 = unlimited).</summary>
     public int MaxItems { get; set; }
 
+    /// <summary>
+    /// Gets or sets the auto re-shuffle cadence: "off" | "hourly" | "daily" | "weekly".
+    /// When set, the DIGtv scheduled task rebuilds this channel (a fresh shuffled order)
+    /// once the interval has elapsed since the last build — no client shuffle needed.
+    /// </summary>
+    public string ReshuffleCadence { get; set; } = "off";
+
     // --- last run telemetry (read-only in UI) ---
 
     /// <summary>Gets or sets the ISO-8601 UTC timestamp of the last successful build.</summary>

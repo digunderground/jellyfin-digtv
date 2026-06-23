@@ -80,6 +80,7 @@
                     Shared: true,
                     TargetPlaylistId: "00000000-0000-0000-0000-000000000000",
                     MaxItems: 0,
+                    ReshuffleCadence: "off",
                     LastStatus: null,
                     LastRunUtc: null,
                     LastItemCount: 0
@@ -98,6 +99,14 @@
                 if (key in o) { return o[key]; }
                 var lc = key.charAt(0).toLowerCase() + key.slice(1);
                 return (lc in o) ? o[lc] : fallback;
+            }
+
+            function cadenceOptions(selected) {
+                var cur = (selected || "off").toString().toLowerCase();
+                var opts = [["off", "Off"], ["hourly", "Hourly"], ["daily", "Daily"], ["weekly", "Weekly"]];
+                return opts.map(function (o) {
+                    return '<option value="' + o[0] + '"' + (o[0] === cur ? " selected" : "") + ">" + o[1] + "</option>";
+                }).join("");
             }
 
             // Merge a server channel into a fully-shaped (PascalCase) channel object.
@@ -161,6 +170,11 @@
                     '</div>' +
 
                     '<div class="inputContainer">' +
+                        '<label class="inputLabel">Auto re-shuffle (rebuild the running order on a timer — no client shuffle needed)</label>' +
+                        '<select data-field="ReshuffleCadence" class="emby-select" style="width:100%;">' + cadenceOptions(ch.ReshuffleCadence) + '</select>' +
+                    '</div>' +
+
+                    '<div class="inputContainer">' +
                         '<label class="inputLabel">Playlist owner</label>' +
                         '<select data-field="OwnerUserId" class="emby-select" style="width:100%;">' + userOptions(ch.OwnerUserId) + '</select>' +
                     '</div>' +
@@ -168,7 +182,7 @@
                     '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="Randomize"' + (ch.Randomize ? " checked" : "") + ' /><span>Randomize order</span></label>' +
                     '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="ReshuffleOnRegenerate"' + (ch.ReshuffleOnRegenerate ? " checked" : "") + ' /><span>Fresh shuffle on every rebuild</span></label>' +
                     '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="Shared"' + (ch.Shared ? " checked" : "") + ' /><span>Share with all users</span></label>' +
-                    '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="Enabled"' + (ch.Enabled ? " checked" : "") + ' /><span>Include in nightly rebuild</span></label>' +
+                    '<label class="checkboxContainer"><input is="emby-checkbox" type="checkbox" data-field="Enabled"' + (ch.Enabled ? " checked" : "") + ' /><span>Channel enabled (allow auto re-shuffle)</span></label>' +
 
                     '<p class="fieldDescription">' + (ch.LastStatus ? esc(ch.LastStatus) + (ch.LastRunUtc ? " — " + esc(ch.LastRunUtc) : "") : "Not built yet.") + '</p>' +
 

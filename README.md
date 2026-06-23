@@ -15,6 +15,8 @@ Android TV, Roku, embedded smart-TV apps — with zero per-device setup.
 - Pick **playlists or library folders** as music-video sources and as bumper sources.
 - Set **how often** a bumper is inserted (every *N* videos).
 - **Randomize** the order and **reshuffle** on every rebuild.
+- **Auto re-shuffle on a cadence** (hourly / daily / weekly) so the running order changes
+  on its own — no need to press client "shuffle".
 - Create **multiple independent channels**.
 - **Per-channel** owner + "share with all users".
 - Rebuild via a **"Regenerate now"** button or a nightly **scheduled task**.

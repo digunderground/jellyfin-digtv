@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.DigTv.Configuration;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -34,7 +36,7 @@ public class RegenerateChannelsTask : IScheduledTask
     public string Key => "DigTvRegenerateChannels";
 
     /// <inheritdoc />
-    public string Description => "Rebuilds and reshuffles all enabled DIGtv MTV channels.";
+    public string Description => "Re-shuffles each DIGtv channel on its configured cadence (hourly / daily / weekly). Runs every hour and rebuilds only the channels that are due, so the running order changes without using client shuffle.";
 
     /// <inheritdoc />
     public string Category => "DIGtv";
@@ -42,26 +44,66 @@ public class RegenerateChannelsTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        var channels = Plugin.Instance!.Configuration.Channels.Where(c => c.Enabled).ToList();
-        if (channels.Count == 0)
+        // Only channels that are enabled, have an auto-reshuffle cadence, and are due.
+        var now = DateTime.UtcNow;
+        var due = Plugin.Instance!.Configuration.Channels
+            .Where(c => c.Enabled && IsDue(c, now))
+            .ToList();
+
+        if (due.Count == 0)
         {
             progress.Report(100);
             return;
         }
 
-        for (var i = 0; i < channels.Count; i++)
+        for (var i = 0; i < due.Count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                await _channelService.BuildChannelAsync(channels[i], cancellationToken).ConfigureAwait(false);
+                await _channelService.BuildChannelAsync(due[i], cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "DIGtv: scheduled rebuild failed for channel {Name}", channels[i].Name);
+                _logger.LogError(ex, "DIGtv: scheduled rebuild failed for channel {Name}", due[i].Name);
             }
 
-            progress.Report((double)(i + 1) / channels.Count * 100);
+            progress.Report((double)(i + 1) / due.Count * 100);
+        }
+    }
+
+    /// <summary>
+    /// True if the channel's auto-reshuffle cadence has elapsed since its last build.
+    /// </summary>
+    private static bool IsDue(ChannelConfig channel, DateTime nowUtc)
+    {
+        var interval = CadenceToInterval(channel.ReshuffleCadence);
+        if (interval is null)
+        {
+            return false; // cadence "off"
+        }
+
+        if (string.IsNullOrEmpty(channel.LastRunUtc)
+            || !DateTime.TryParse(
+                channel.LastRunUtc,
+                CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal,
+                out var last))
+        {
+            return true; // never built (or unparseable) -> build now
+        }
+
+        return nowUtc - last >= interval.Value;
+    }
+
+    private static TimeSpan? CadenceToInterval(string? cadence)
+    {
+        switch ((cadence ?? "off").Trim().ToLowerInvariant())
+        {
+            case "hourly": return TimeSpan.FromHours(1);
+            case "daily": return TimeSpan.FromDays(1);
+            case "weekly": return TimeSpan.FromDays(7);
+            default: return null;
         }
     }
 
@@ -72,9 +114,10 @@ public class RegenerateChannelsTask : IScheduledTask
         {
             new TaskTriggerInfo
             {
-                // 10.10 uses the string trigger constants (10.11+ switched to an enum).
-                Type = TaskTriggerInfo.TriggerDaily,
-                TimeOfDayTicks = TimeSpan.FromHours(4).Ticks
+                // Run hourly; per-channel cadence is enforced in ExecuteAsync.
+                // 10.10 uses string trigger constants (10.11+ switched to an enum).
+                Type = TaskTriggerInfo.TriggerInterval,
+                IntervalTicks = TimeSpan.FromHours(1).Ticks
             }
         };
     }
