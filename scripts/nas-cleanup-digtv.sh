@@ -8,11 +8,13 @@
 # channel config xml), then starts Jellyfin again — giving a clean slate so a
 # fresh install of DIGtv 1.0.2.0 sticks.
 #
-# HOW TO RUN (Synology):
+# HOW TO RUN (Synology, NO SSH NEEDED):
 #   DSM > Control Panel > Task Scheduler > Create > Scheduled Task > User-defined script
-#   User: root   |   paste this whole script (or call it) into "Run command".
-#   Run it ONCE, then install DIGtv 1.0.2.0 from Dashboard > Plugins > Catalog
-#   and restart Jellyfin one more time.
+#   General tab : set User = root  (required for synopkg + deleting under @appdata)
+#   Task Settings tab : paste this ENTIRE script into the "Run command" box.
+#   Save, select the task, click "Run" once. Then install DIGtv 1.0.2.0 from
+#   Dashboard > Plugins > Catalog and restart Jellyfin one more time.
+#   (The "Run command" box accepts a full multi-line script — no file required.)
 #
 # Safe to re-run. Set DRY_RUN=1 to preview without deleting.
 # ---------------------------------------------------------------------------
