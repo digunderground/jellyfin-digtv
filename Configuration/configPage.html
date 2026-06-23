@@ -50,7 +50,7 @@
                 users: []
             };
 
-            function api(method, path, body) {
+            function api(method, path, body, wantJson) {
                 var opts = {
                     type: method,
                     url: ApiClient.getUrl("DigTv/" + path),
@@ -59,7 +59,7 @@
                 if (body !== undefined) {
                     opts.data = JSON.stringify(body);
                 }
-                if (method === "GET") {
+                if (method === "GET" || wantJson) {
                     opts.dataType = "json";
                 }
                 return ApiClient.ajax(opts);
@@ -258,10 +258,11 @@
                     var ch = state.channels[idx];
                     if (!ch) { return; }
                     Dashboard.showLoadingMsg();
-                    api("POST", "channels/" + ch.Id + "/regenerate")
+                    api("POST", "channels/" + ch.Id + "/regenerate", undefined, true)
                         .then(function (r) {
+                            if (typeof r === "string" && r) { try { r = JSON.parse(r); } catch (e) { r = {}; } }
                             Dashboard.hideLoadingMsg();
-                            Dashboard.alert("Built '" + ch.Name + "': " + gp(r, "TotalItems") + " items (" + gp(r, "VideoCount") + " videos / " + gp(r, "BumperCount") + " bumpers).");
+                            Dashboard.alert("Built '" + ch.Name + "': " + gp(r, "TotalItems", "?") + " items (" + gp(r, "VideoCount", "?") + " videos / " + gp(r, "BumperCount", "?") + " bumpers).");
                             loadAll(page);
                         })
                         .catch(function (e) {
