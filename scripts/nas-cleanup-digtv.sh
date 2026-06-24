@@ -2,11 +2,14 @@
 # ---------------------------------------------------------------------------
 # DIGtv NAS cleanup  —  Synology DSM Task Scheduler friendly (POSIX sh)
 #
-# WHY: Jellyfin wipes the DIGtv plugin on restart when a stale/"Deleted"
-# plugin folder is left behind from repeated install/reinstall. This script
-# stops Jellyfin, removes the stale DIGtv_* plugin folders (KEEPING your
-# channel config xml), then starts Jellyfin again — giving a clean slate so a
-# fresh install of DIGtv 1.0.2.0 sticks.
+# WHY: Plugin builds <= 1.1.2.0 wrote data to plugins/DIGtv. Jellyfin scans every
+# top-level folder in plugins/ and mistook that "DIGtv" data folder for a phantom
+# (newest) plugin, deleting the REAL DIGtv_x.y.z folder on every restart. Build
+# 1.1.3.0 fixes the code (data now lives in plugins/configurations/DIGtv, which is
+# not scanned), but the pre-existing phantom plugins/DIGtv folder must be removed
+# ONCE — the plugin can't delete it itself. This script does that (and clears any
+# stale DIGtv_* version folders), KEEPING your channel config xml.
+# Run this ONCE, then install DIGtv 1.1.3.0 (or newer) and restart — it will stick.
 #
 # HOW TO RUN (Synology, NO SSH NEEDED):
 #   DSM > Control Panel > Task Scheduler > Create > Scheduled Task > User-defined script
