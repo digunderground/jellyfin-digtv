@@ -128,5 +128,5 @@ public class DigTvController : ControllerBase
     /// <summary>Lists users for the owner dropdown.</summary>
     [HttpGet("users")]
     public ActionResult<IReadOnlyList<UserDto>> GetUsers()
-        => Ok(_userManager.Users.Select(u => new UserDto(u.Id, u.Username)).ToList());
+        => Ok(_userManager.GetUsers().Select(u => new UserDto(u.Id, u.Username)).ToList());
 }

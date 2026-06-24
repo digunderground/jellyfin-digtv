@@ -134,7 +134,8 @@ public class ChannelService
         // No (or stale) owner configured: fall back to the first user. We avoid a
         // PermissionKind admin check on purpose — that enum has moved namespaces
         // between Jellyfin versions, and any user can own a playlist anyway.
-        return _userManager.Users.FirstOrDefault()?.Id ?? Guid.Empty;
+        // 10.11 exposes GetUsers() (the 10.10 `Users` property was removed).
+        return _userManager.GetUsers().FirstOrDefault()?.Id ?? Guid.Empty;
     }
 
     /// <summary>
