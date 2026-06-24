@@ -115,8 +115,8 @@ public class RegenerateChannelsTask : IScheduledTask
             new TaskTriggerInfo
             {
                 // Run hourly; per-channel cadence is enforced in ExecuteAsync.
-                // 10.10 uses string trigger constants (10.11+ switched to an enum).
-                Type = TaskTriggerInfo.TriggerInterval,
+                // 10.11 uses the TaskTriggerInfoType enum (10.10 used string constants).
+                Type = TaskTriggerInfoType.IntervalTrigger,
                 IntervalTicks = TimeSpan.FromHours(1).Ticks
             }
         };

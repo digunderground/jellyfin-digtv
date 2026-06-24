@@ -10,35 +10,11 @@
         "versions": [
             {
                 "version": "1.1.0.0",
-                "changelog": "Release v1.1.0.0",
-                "targetAbi": "10.10.0.0",
+                "changelog": "Retarget to Jellyfin 10.11.x. Fixes the plugin being dropped on restart after the server updated from 10.10 to 10.11. Adds per-channel auto re-shuffle (hourly/daily/weekly).",
+                "targetAbi": "10.11.0.0",
                 "sourceUrl": "https://github.com/digunderground/jellyfin-digtv/releases/download/v1.1.0.0/digtv_1.1.0.0.zip",
                 "checksum": "c5bb5f7d5d9a4f3560d22406b76237cd",
                 "timestamp": "2026-06-24T23:26:33Z"
-            },
-            {
-                "version": "1.0.3.0",
-                "changelog": "Release v1.0.3.0",
-                "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/digunderground/jellyfin-digtv/releases/download/v1.0.3.0/digtv_1.0.3.0.zip",
-                "checksum": "8f8db091cdf0b82bb6ad9350e6810730",
-                "timestamp": "2026-06-23T22:59:25Z"
-            },
-            {
-                "version": "1.0.2.0",
-                "changelog": "Release v1.0.2.0",
-                "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/digunderground/jellyfin-digtv/releases/download/v1.0.2.0/digtv_1.0.2.0.zip",
-                "checksum": "1b053c7441311497c434eef22d594dfb",
-                "timestamp": "2026-06-23T22:33:37Z"
-            },
-            {
-                "version": "1.0.1.0",
-                "changelog": "Release v1.0.1.0",
-                "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/digunderground/jellyfin-digtv/releases/download/v1.0.1.0/digtv_1.0.1.0.zip",
-                "checksum": "f4f8feb1dc34c2625c9eccc8fa6234b3",
-                "timestamp": "2026-05-30T18:21:54Z"
             }
         ]
     }
