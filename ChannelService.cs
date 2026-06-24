@@ -65,14 +65,23 @@ public class ChannelService
     }
 
     /// <summary>
-    /// Gets the DIGtv data directory (/plugin/DIGtv). Holds the channels.json
-    /// mirror and per-channel last-run logs for easy inspection.
+    /// Gets the DIGtv data directory. Holds the channels.json mirror and
+    /// per-channel last-run logs for easy inspection.
     /// </summary>
+    /// <remarks>
+    /// CRITICAL: this must NOT be a top-level folder inside PluginsPath. Jellyfin's
+    /// PluginManager.DiscoverPlugins() enumerates every top-level folder under
+    /// plugins/ and treats one named "DIGtv" as a phantom plugin whose version
+    /// defaults to the server version — i.e. "newer" than the real DIGtv_x.y.z
+    /// folder — so its de-duplication deletes the real plugin on every restart.
+    /// We therefore store under plugins/configurations/DIGtv (a nested folder that
+    /// is not scanned), which also survives plugin updates.
+    /// </remarks>
     public string DataPath
     {
         get
         {
-            var path = Path.Combine(_appPaths.PluginsPath, "DIGtv");
+            var path = Path.Combine(_appPaths.PluginConfigurationsPath, "DIGtv");
             Directory.CreateDirectory(path);
             return path;
         }
